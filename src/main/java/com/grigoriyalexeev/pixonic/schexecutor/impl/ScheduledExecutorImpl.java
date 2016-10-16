@@ -9,8 +9,13 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class ScheduledExecutorImpl implements ScheduledExecutor {
-    public Future execute(Callable task, DateTime executionTime) {
-        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1);
+    private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
+
+    public ScheduledExecutorImpl(Integer numThreads) {
+        this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(numThreads);
+    }
+
+    public <T>Future<T> schedule(Callable<T> task, DateTime executionTime) {
         return scheduledThreadPoolExecutor.schedule(task, executionTime.minus(System.currentTimeMillis()).getMillis(), TimeUnit.MILLISECONDS);
     }
 }

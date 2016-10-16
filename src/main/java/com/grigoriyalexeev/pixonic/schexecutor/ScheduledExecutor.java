@@ -6,5 +6,5 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 public interface ScheduledExecutor {
-    Future execute(Callable task, DateTime dateTime);
+    <T>Future<T> schedule(Callable<T> task, DateTime dateTime);
 }
