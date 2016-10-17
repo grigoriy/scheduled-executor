@@ -8,6 +8,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Scheduled tasks execute no sooner than they are enabled, but
+ * without any real-time guarantees about when, after they are
+ * enabled, they will commence. Tasks scheduled for exactly the same
+ * execution time are enabled in first-in-first-out (FIFO) order of
+ * submission.
+ */
 public class ScheduledExecutorImpl implements ScheduledExecutor {
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
