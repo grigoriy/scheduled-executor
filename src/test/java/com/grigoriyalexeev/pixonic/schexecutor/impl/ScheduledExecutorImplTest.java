@@ -1,5 +1,6 @@
 package com.grigoriyalexeev.pixonic.schexecutor.impl;
 
+import com.grigoriyalexeev.pixonic.schexecutor.ScheduledExecutor;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
@@ -15,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 public class ScheduledExecutorImplTest {
     @Test
     public void execute_singleTaskInFuture_executesInTime() throws Exception {
-        ScheduledExecutorImpl executor = new ScheduledExecutorImpl(1);
+        ScheduledExecutor executor = getExecutor(5);
         Callable<Long> callable = createMillisCallable();
         final int delaySeconds = 1;
         DateTime expectedExecutionTime = DateTime.now().plusSeconds(delaySeconds);
@@ -28,7 +29,7 @@ public class ScheduledExecutorImplTest {
 
     @Test
     public void execute_singleTaskInPast_executesImmediately() throws Exception {
-        ScheduledExecutorImpl executor = new ScheduledExecutorImpl(1);
+        ScheduledExecutor executor = getExecutor(5);
         Callable<Long> callable = createNanosCallable();
         final int delaySeconds = 1;
         DateTime expectedExecutionTime = DateTime.now().minusSeconds(delaySeconds);
@@ -47,7 +48,7 @@ public class ScheduledExecutorImplTest {
         int wrongTimingsCounter = 0;
 
         for (int j = 0; j < numTrials; j++) {
-            ScheduledExecutorImpl executor = new ScheduledExecutorImpl(1);
+            ScheduledExecutor executor = getExecutor(5);
             DateTime expectedExecutionTime = DateTime.now().minusSeconds(delayMillis);
             List<Future<Long>> actualExecutionTimeFutures = new ArrayList<Future<Long>>();
 
@@ -75,15 +76,13 @@ public class ScheduledExecutorImplTest {
         final int numTrials = 100;
 
         for (int j = 0; j < numTrials; j++) {
-            ScheduledExecutorImpl executor = new ScheduledExecutorImpl(1);
+            ScheduledExecutor executor = getExecutor(5);
             DateTime expectedExecutionTimeSleep = DateTime.now().plusMillis(delayMillisSleepTask);
             DateTime expectedExecutionTimeLater = DateTime.now().plusMillis(delayMillisLater);
             DateTime expectedExecutionTimeEarlier = DateTime.now().plusMillis(delayMillisEarlier);
-            Callable<Void> sleepTask = new Callable<Void>() {
-                public Void call() throws Exception {
-                    Thread.sleep(10);
-                    return null;
-                }
+            Callable<Void> sleepTask = () -> {
+                Thread.sleep(10);
+                return null;
             };
             executor.schedule(sleepTask, expectedExecutionTimeSleep);
             Future<Long> laterTaskActualExecutionTimeFuture = executor.schedule(createNanosCallable(), expectedExecutionTimeLater);
@@ -95,18 +94,15 @@ public class ScheduledExecutorImplTest {
     }
 
     private static Callable<Long> createMillisCallable() {
-        return new Callable<Long>() {
-            public Long call() throws Exception {
-                return System.currentTimeMillis();
-            }
-        };
+        return System::currentTimeMillis;
     }
 
     private static Callable<Long> createNanosCallable() {
-        return new Callable<Long>() {
-            public Long call() throws Exception {
-                return System.nanoTime();
-            }
-        };
+        return System::nanoTime;
+    }
+
+    private static ScheduledExecutor getExecutor(int numThreads) {
+//        return new ScheduledExecutorImpl(numThreads);
+        return new FairScheduledThreadPoolExecutor(1);
     }
 }
